@@ -1,6 +1,6 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators'
 import { $axios } from '~/utils/api'
-import { VisitorCount } from '~/models/VisitorCount'
+import { VisitorInterface } from '~/models/VisitorInterface'
 
 @Module({
   name: 'visitor',
@@ -8,21 +8,21 @@ import { VisitorCount } from '~/models/VisitorCount'
   namespaced: true
 })
 export default class Visitor extends VuexModule {
-  visitorCount: VisitorCount = {} as any
+  visitor: VisitorInterface = {} as any
 
   @Mutation
-  private setVisitorCount(visitorCount: any) {
-    this.visitorCount = visitorCount
+  public setVisitor(visitor: any) {
+    this.visitor = visitor
   }
 
   @Action({ rawError: true })
-  public async getVisitorCount() {
-    let visitorCount
+  public async getVisitor() {
+    let visitor
     try {
-      visitorCount = await $axios.get(process.env.baseUrl + '/visitor/count')
+      visitor = await $axios.get(process.env.baseUrl + '/visitor/count')
     } catch (error) {
       console.log(error)
     }
-    this.setVisitorCount(visitorCount?.data)
+    this.setVisitor(visitor?.data)
   }
 }

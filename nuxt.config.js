@@ -1,3 +1,6 @@
+import path from 'path'
+import fs from 'fs'
+
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -12,6 +15,13 @@ export default {
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
   },
+
+  // server: {
+  //   https: {
+  //     key: fs.readFileSync(path.resolve(__dirname, 'localhost-key.pem')),
+  //     cert: fs.readFileSync(path.resolve(__dirname, 'localhost.pem'))
+  //   }
+  // },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins

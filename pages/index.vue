@@ -5,28 +5,51 @@
       <h1 class="title">
         NuxtSignalR
       </h1>
-      <h2>today: {{ visitorCount.counter }}</h2>
+      <div>
+        <h2>today: {{ visitor.count }}</h2>
+      </div>
+      <div>
+        <h2>age: {{ visitor.age }}</h2>
+      </div>
+      <div>
+        <h2>gender: {{ visitor.gender }}</h2>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { VisitorCount } from '~/models/VisitorCount'
+import { VisitorInterface } from '~/models/VisitorInterface'
+import { Visitor } from '~/models/Visitor'
 import { visitorStore } from '~/store'
+import * as signalR from '@microsoft/signalr'
+const connection = new signalR.HubConnectionBuilder()
+  .withUrl(process.env.baseUrl + '/hub')
+  .withAutomaticReconnect()
+  .build()
 
 export default Vue.extend({
-  async fetch() {
-    await this.get()
+  created() {
+    if (connection.state !== signalR.HubConnectionState.Connected) {
+      connection.start()
+    }
+    connection.on('ReceiveVisitor', (visitorCount, age, gender) => {
+      const visitor = new Visitor(visitorCount, age, gender)
+      visitorStore.setVisitor(visitor)
+    })
   },
+  // async fetch() {
+  //   await this.get()
+  // },
   methods: {
     async get() {
-      await visitorStore.getVisitorCount()
+      await visitorStore.getVisitor()
     }
   },
   computed: {
-    visitorCount(): VisitorCount {
-      return visitorStore.visitorCount
+    visitor(): VisitorInterface {
+      return visitorStore.visitor
     }
   }
 })
