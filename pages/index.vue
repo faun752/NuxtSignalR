@@ -5,23 +5,14 @@
       <h1 class="title">
         NuxtSignalR
       </h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
+      <div>
+        <h2>today: {{ visitor.count }}</h2>
+      </div>
+      <div>
+        <h2>age: {{ visitor.age }}</h2>
+      </div>
+      <div>
+        <h2>gender: {{ visitor.gender }}</h2>
       </div>
     </div>
   </div>
@@ -29,8 +20,39 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { VisitorInterface } from '~/models/VisitorInterface'
+import { Visitor } from '~/models/Visitor'
+import { visitorStore } from '~/store'
+import * as signalR from '@microsoft/signalr'
+const connection = new signalR.HubConnectionBuilder()
+  .withUrl(process.env.baseUrl + '/hub')
+  .withAutomaticReconnect()
+  .build()
 
-export default Vue.extend({})
+export default Vue.extend({
+  created() {
+    if (connection.state !== signalR.HubConnectionState.Connected) {
+      connection.start()
+    }
+    connection.on('ReceiveVisitor', (visitorCount, age, gender) => {
+      const visitor = new Visitor(visitorCount, age, gender)
+      visitorStore.setVisitor(visitor)
+    })
+  },
+  // async fetch() {
+  //   await this.get()
+  // },
+  methods: {
+    async get() {
+      await visitorStore.getVisitor()
+    }
+  },
+  computed: {
+    visitor(): VisitorInterface {
+      return visitorStore.visitor
+    }
+  }
+})
 </script>
 
 <style>
@@ -44,16 +66,8 @@ export default Vue.extend({})
 }
 
 .title {
-  font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
+  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   display: block;
   font-weight: 300;
   font-size: 100px;
